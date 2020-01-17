@@ -1,3 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: redis
+  name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+      role: master
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: redis
+        role: master
+        tier: backend
+    spec:
+      containers:
+        - image: 'k8s.gcr.io/redis:e2e'
+          name: master
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: redis
+    role: master
+    tier: backend
+  name: redis
+spec:
+  ports:
+    - port: 6379
+      targetPort: 6379
+  selector:
+    app: redis
+    role: master
+    tier: backend
+---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -30,41 +77,4 @@ spec:
     app: test-flask
   type: LoadBalancer
 ---
-apiVersion: extensions/v1beta1
-  kind: Deployment
-  metadata:
-    creationTimestamp: null
-    name: redis
-  spec:
-    replicas: 1
-    strategy: {}
-    template:
-      metadata:
-        creationTimestamp: null
-        labels:
-          app: redis
-      spec:
-        containers:
-        - image: 'gcr.io/google_containers/redis:latest'
-          name: redis
-          resources: {}
-        restartPolicy: Always
-  status: {}
----
-apiVersion: v1
-kind: Service
-metadata:
-  creationTimestamp: null
-  labels:
-    app: redis
-  name: redis
-spec:
-  clusterIP: None
-  ports:
-  - name: headless
-    port: 55555
-    targetPort: 0
-  selector:
-    service.name: redis
-status:
-  loadBalancer: {}
+null
