@@ -29,3 +29,42 @@ spec:
   selector:
     app: test-flask
   type: LoadBalancer
+---
+apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    creationTimestamp: null
+    name: redis
+  spec:
+    replicas: 1
+    strategy: {}
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: redis
+      spec:
+        containers:
+        - image: 'gcr.io/google_containers/redis:latest'
+          name: redis
+          resources: {}
+        restartPolicy: Always
+  status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: redis
+  name: redis
+spec:
+  clusterIP: None
+  ports:
+  - name: headless
+    port: 55555
+    targetPort: 0
+  selector:
+    service.name: redis
+status:
+  loadBalancer: {}
